@@ -1,20 +1,26 @@
 let square;
 let obstacle1;
+let obstacle2;
 
-let canvasWidth= 400;
+let canvasWidth = 400;
 let canvasHeight = 400;
+
+let mov = 10;
 
 function setup() {
   createCanvas(canvasWidth, canvasHeight);
-  square = new Square(0, 0, 50, 50);
-  obstacle1 = new Square(55, 55, 25, 25);
+  square = new Square(0, 0, 50, 50, color(255, 0, 0));
+  obstacle1 = new Square(50, 50, 30, 30, color(255, 255, 0));
+  obstacle2 = new Square(230, 250, 70, 70, color(0, 225, 255));
 }
 
 function draw() {
   background(220);
   square.display();
   obstacle1.display();
-  square.update();
+  obstacle2.display();
+  let obstacles = [obstacle1, obstacle2];
+  square.update(obstacles);
 }
 
 function keyPressed() {
@@ -30,49 +36,72 @@ function keyPressed() {
 }
 
 class Square {
-  constructor(x, y, width, height) {
+  constructor(x, y, width, height, color) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
+    this.color = color;
   }
 
-  update() {
-    if (this.isCollisionX()) {
-      console.log("good");
-    }
-    if(this.isCollisionY()) {
-      console.log("bad")
-      this.y -= 10;
-    }
+  update(objects) {
+    this.isCollisionX();
+    this.isCollisionY();
+    this.isCollisionObj(objects)
   }
 
   display() {
-    fill(255, 0, 0);
+    fill(this.color);
     rect(this.x, this.y, this.width, this.height);
   }
 
   leftArrow() {
-    this.x -= 10;
+    this.x -= mov;
   }
 
   rightArrow() {
-    this.x += 10;
+    this.x += mov;
   }
 
   upArrow() {
-    this.y -= 10;
+    this.y -= mov;
   }
 
   downArrow() {
-    this.y += 10;
+    this.y += mov;
   }
 
   isCollisionX() {
-    return this.x < 0 || this.x + this.width > canvasWidth;
+    if (this.x < 0) {
+      this.x += mov;
+    } else if (this.x + this.width > canvasWidth) {
+      this.x -= mov;
+    }
   }
 
   isCollisionY() {
-    return this.y < 0 || this.y + this.height > canvasHeight;
+    if (this.y < 0) {
+      this.y += mov;
+    } else if (this.y + this.height > canvasHeight) {
+      this.y -= mov;
+    }
+  }
+
+  isCollisionObj(objects) {
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      if (
+        this.x < obj.x + obj.width &&
+        this.x + this.width > obj.x &&
+        this.y < obj.y + obj.height &&
+        this.y + this.height > obj.y
+      ) {
+        this.x = this.prevX;
+        this.y = this.prevY;
+        break; 
+      }
+    }
+    this.prevX = this.x;
+    this.prevY = this.y;
   }
 }
